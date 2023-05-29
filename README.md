@@ -119,14 +119,14 @@ CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(USER, PWD));
 ```
 
-4.Create an SSLFactory instance to configure SSL/TLS settings for secure communication. In this example, i'm use an unsafe trust material and hostname verifier. For production use, you should use proper trust material and verify the server's hostname.
+4. Create an SSLFactory instance to configure SSL/TLS settings for secure communication. In this example, i'm use an unsafe trust material and hostname verifier. For production use, you should use proper trust material and verify the server's hostname.
 ```
 SSLFactory sslFactory = SSLFactory.builder()
                 .withUnsafeTrustMaterial()
                 .withUnsafeHostnameVerifier()
                 .build();
 ```
-5.In the next step, a RestClient instance is created, specifying the Elasticsearch server's host, port, and the "https" scheme for secure communication. The HttpClientConfigCallback is used to configure the underlying HTTP client with the provided credentials and SSL/TLS settings.
+5. In the next step, a RestClient instance is created, specifying the Elasticsearch server's host, port, and the "https" scheme for secure communication. The HttpClientConfigCallback is used to configure the underlying HTTP client with the provided credentials and SSL/TLS settings.
 ```
 RestClient restClient = RestClient.builder(
                         new HttpHost("localhost", 9200, "https"))
@@ -136,25 +136,25 @@ RestClient restClient = RestClient.builder(
                         .setSSLHostnameVerifier(sslFactory.getHostnameVerifier())
                         ).build();
 ```
-6.An ElasticsearchTransport instance is created using the RestClient and a JacksonJsonpMapper, which handles JSON serialization and deserialization.
+6. An ElasticsearchTransport instance is created using the RestClient and a JacksonJsonpMapper, which handles JSON serialization and deserialization.
 ```
 ElasticsearchTransport transport = new RestClientTransport(
         restClient, new JacksonJsonpMapper()
 );
 
 ```
-7.Finally, an ElasticsearchClient is instantiated using the transport, allowing you to perform operations on Elasticsearch.
+7. Finally, an ElasticsearchClient is instantiated using the transport, allowing you to perform operations on Elasticsearch.
 ```
 elasticsearchClient = new ElasticsearchClient(transport);
 ```
 
-8.This section defines a matchQuery using the MatchQuery builder, which matches documents based on the content field. The query variable represents the search query term.
+8. This section defines a matchQuery using the MatchQuery builder, which matches documents based on the content field. The query variable represents the search query term.
 ```
 public SearchResponse search() {
     Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
 
 ```
-9.Here, the search method is called on the elasticsearchClient object. It performs a search operation on the wikipedia index, starting from the first document (from index 0) and returning a maximum of 10 documents
+9. Here, the search method is called on the elasticsearchClient object. It performs a search operation on the wikipedia index, starting from the first document (from index 0) and returning a maximum of 10 documents
 (size 10). The matchQuery is used as the search query. The response is captured in a SearchResponse<ObjectNode>.
 
 ```
@@ -203,7 +203,7 @@ hits.forEach(h -> {
 
 ```
         
-4.The printResults method is a helper method that formats and prints the title and content of a search result.
+4. The printResults method is a helper method that formats and prints the title and content of a search result.
         
 ```
 private static void printResults(String title, String content) {
