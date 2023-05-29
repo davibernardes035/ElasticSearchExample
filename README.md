@@ -63,7 +63,7 @@ Maven example (add to your project's pom.xml):
             <version>${slf4j-simple}</version>
         </dependency>
 
-    </dependencies>
+</dependencies>
 ```
 3. Import the necessary Elasticsearch classes in your Java code:
 
@@ -89,10 +89,128 @@ import javax.security.auth.login.CredentialException;
 import java.io.IOException;
 ```
 
+## Connecting to Elasticsearch
+1. Create a new istance of `ElasticsearchClient` and its constructor:
+
+```
+private ElasticsearchClient elasticsearchClient;
+private final String query;
+
+public ESClient(String query) {
+        this.query = query;
+        createConnection();
+}
+```
+2. Create a new method (obs: there is a bad practice in the code, putting login and password inside the snippet. Please never do this. It's just for testing.)
+```
+ private void createConnection() {
+        String USER = "user";
+        String PWD = "password";
+        .
+        .
+        .
+}
+```
+
+3. Create a `CredentialsProvider` and sets the username and password for authentication.
+
+```
+CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(USER, PWD));
+```
+
+4.Create an SSLFactory instance to configure SSL/TLS settings for secure communication. In this example, i'm use an unsafe trust material and hostname verifier. For production use, you should use proper trust material and verify the server's hostname.
+```
+SSLFactory sslFactory = SSLFactory.builder()
+                .withUnsafeTrustMaterial()
+                .withUnsafeHostnameVerifier()
+                .build();
+```
+5.In the next step, a RestClient instance is created, specifying the Elasticsearch server's host, port, and the "https" scheme for secure communication. The HttpClientConfigCallback is used to configure the underlying HTTP client with the provided credentials and SSL/TLS settings.
+```
+RestClient restClient = RestClient.builder(
+                        new HttpHost("localhost", 9200, "https"))
+                        .setHttpClientConfigCallback((HttpAsyncClientBuilder httpClientBuilder) -> httpClientBuilder
+                        .setDefaultCredentialsProvider(credentialsProvider)
+                        .setSSLContext(sslFactory.getSslContext())
+                        .setSSLHostnameVerifier(sslFactory.getHostnameVerifier())
+                        ).build();
+```
+6.An ElasticsearchTransport instance is created using the RestClient and a JacksonJsonpMapper, which handles JSON serialization and deserialization.
+```
+ElasticsearchTransport transport = new RestClientTransport(
+        restClient, new JacksonJsonpMapper()
+);
+
+```
+7.Finally, an ElasticsearchClient is instantiated using the transport, allowing you to perform operations on Elasticsearch.
+```
+elasticsearchClient = new ElasticsearchClient(transport);
+```
+
+8.This section defines a matchQuery using the MatchQuery builder, which matches documents based on the content field. The query variable represents the search query term.
+```
+public SearchResponse search() {
+    Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
+
+```
+9.Here, the search method is called on the elasticsearchClient object. It performs a search operation on the wikipedia index, starting from the first document (from index 0) and returning a maximum of 10 documents
+(size 10). The matchQuery is used as the search query. The response is captured in a SearchResponse<ObjectNode>.
+
+```
+SearchResponse<ObjectNode> response;
+try {
+        response = elasticsearchClient.search(s -> s
+                .index("wikipedia").from(0).size(10)
+                .query(matchQuery), ObjectNode.class);
+} catch (IOException e) {
+        throw new RuntimeException(e);
+}
+
+```
+10. The method returns the SearchResponse object containing the search results.
+
+Please note that you need to import the necessary classes, such as SearchResponse, Query, MatchQuery, ObjectNode, and IOException.
+```
+return response;
+```
+
 ## Running the Example
-1. Make sure Elasticsearch is up and running.
-2. Compile and run your Java application that contains the Elasticsearch code.
-3. Verify that the search results are returned successfully.
+1. In the main method, an instance of the ESClient class is created, passing "math test" as the query parameter.
+        
+```
+public class Main {
+    public static void main(String[] args) {
+        ESClient esClient = new ESClient("math test");
+
+```
+2. The search method is called on the esClient object to execute the search operation. The searchResponse variable holds the response object. The hits are retrieved from the response and stored in the hits list.
+        
+```
+var searchResponse = esClient.search();
+List<Hit<ObjectNode>> hits = searchResponse.hits().hits();
+
+```
+3. Using a forEach loop, each hit in the hits list is processed. The title and content fields of each hit are retrieved using h.source().get("title").asText() and h.source().get("content").asText(), respectively.
+Then, the printResults method is called to print the formatted results.
+
+```
+hits.forEach(h -> {
+        String title = h.source().get("title").asText();
+        String content = h.source().get("content").asText();
+        printResults(title, content);
+});
+
+```
+        
+4.The printResults method is a helper method that formats and prints the title and content of a search result.
+        
+```
+private static void printResults(String title, String content) {
+        // Formatting and printing the results
+}
+
+```
 
 ## Conclusion
 Congratulations! You have successfully set up a Java connection with Elasticsearch and performed a search operation. You can now expand upon this example to build more advanced search functionality or integrate other Elasticsearch features into your Java application. For more information, refer to the Elasticsearch Java client documentation: https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/index.html
