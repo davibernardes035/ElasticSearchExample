@@ -119,14 +119,14 @@ CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(USER, PWD));
 ```
 
-4. Create an SSLFactory instance to configure SSL/TLS settings for secure communication. In this example, i'm use an unsafe trust material and hostname verifier. For production use, you should use proper trust material and verify the server's hostname.
+4. Create an `SSLFactory` instance to configure SSL/TLS settings for secure communication. In this example, i'm use an unsafe trust material and hostname verifier. For production use, you should use proper trust material and verify the server's hostname.
 ```
 SSLFactory sslFactory = SSLFactory.builder()
                 .withUnsafeTrustMaterial()
                 .withUnsafeHostnameVerifier()
                 .build();
 ```
-5. In the next step, a RestClient instance is created, specifying the Elasticsearch server's host, port, and the "https" scheme for secure communication. The HttpClientConfigCallback is used to configure the underlying HTTP client with the provided credentials and SSL/TLS settings.
+5. In the next step, a `RestClient` instance is created, specifying the Elasticsearch server's host, port, and the "https" scheme for secure communication. The `HttpClientConfigCallback` is used to configure the underlying HTTP client with the provided credentials and SSL/TLS settings.
 ```
 RestClient restClient = RestClient.builder(
                         new HttpHost("localhost", 9200, "https"))
@@ -136,26 +136,26 @@ RestClient restClient = RestClient.builder(
                         .setSSLHostnameVerifier(sslFactory.getHostnameVerifier())
                         ).build();
 ```
-6. An ElasticsearchTransport instance is created using the RestClient and a JacksonJsonpMapper, which handles JSON serialization and deserialization.
+6. An `ElasticsearchTransport` instance is created using the `RestClient` and a `JacksonJsonpMapper`, which handles JSON serialization and deserialization.
 ```
 ElasticsearchTransport transport = new RestClientTransport(
         restClient, new JacksonJsonpMapper()
 );
 
 ```
-7. Finally, an ElasticsearchClient is instantiated using the transport, allowing you to perform operations on Elasticsearch.
+7. Finally, an `ElasticsearchClient` is instantiated using the transport, allowing you to perform operations on Elasticsearch.
 ```
 elasticsearchClient = new ElasticsearchClient(transport);
 ```
 
-8. This section defines a matchQuery using the MatchQuery builder, which matches documents based on the content field. The query variable represents the search query term.
+8. This section defines a `matchQuery` using the `MatchQuery` builder, which matches documents based on the content field. The query variable represents the search query term.
 ```
 public SearchResponse search() {
     Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
 
 ```
-9. Here, the search method is called on the elasticsearchClient object. It performs a search operation on the wikipedia index, starting from the first document (from index 0) and returning a maximum of 10 documents
-(size 10). The matchQuery is used as the search query. The response is captured in a SearchResponse<ObjectNode>.
+9. Here, the search method is called on the `elasticsearchClient` object. It performs a search operation on the wikipedia index, starting from the first document (from index 0) and returning a maximum of 10 documents
+(size 10). The `matchQuery` is used as the search query. The response is captured in a `SearchResponse<ObjectNode>`.
 
 ```
 SearchResponse<ObjectNode> response;
@@ -176,7 +176,7 @@ return response;
 ```
 
 ## Running the Example
-1. In the main method, an instance of the ESClient class is created, passing "math test" as the query parameter.
+1. In the main method, an instance of the `ESClient` class is created, passing "math test" as the query parameter.
         
 ```
 public class Main {
@@ -184,14 +184,14 @@ public class Main {
         ESClient esClient = new ESClient("math test");
 
 ```
-2. The search method is called on the esClient object to execute the search operation. The searchResponse variable holds the response object. The hits are retrieved from the response and stored in the hits list.
+2. The search method is called on the `esClient` object to execute the search operation. The `searchResponse` variable holds the response object. The hits are retrieved from the response and stored in the hits list.
         
 ```
 var searchResponse = esClient.search();
 List<Hit<ObjectNode>> hits = searchResponse.hits().hits();
 
 ```
-3. Using a forEach loop, each hit in the hits list is processed. The title and content fields of each hit are retrieved using h.source().get("title").asText() and h.source().get("content").asText(), respectively.
+3. Using a `forEach` loop, each hit in the hits list is processed. The title and content fields of each hit are retrieved using `h.source().get("title").asText()` and `h.source().get("content").asText()`, respectively.
 Then, the printResults method is called to print the formatted results.
 
 ```
