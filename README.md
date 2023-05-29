@@ -6,10 +6,10 @@ This is a README file that provides an example of how to connect Java with Elast
 
 To run this example, you'll need the following:
 
-*Java Development Kit (JDK) installed on your machine;
-*Elasticsearch installed and running locally or on a remote server;
-*Login and password to log in with elastic through kibana;
-*Elasticsearch Java client library added to your project dependencies.
+* Java Development Kit (JDK) installed on your machine;
+* Elasticsearch installed and running locally or on a remote server;
+* Login and password to log in with elastic through kibana;
+* Elasticsearch Java client library added to your project dependencies.
 
 ## Setting up the Project
 
